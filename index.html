@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Chase – Online</title>
+<style>
+:root{--bg:#070d24;--card:#0d1a47;--text:#f3f6ff;--muted:#9fb0e6;--line:#2a3f8f;--p:#f0c040;--c:#ff3b52;--ok:#2fd27f;--no:#ff4d5e;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;color:var(--text);font-family:Georgia,"Times New Roman",serif;background:radial-gradient(ellipse at 50% -10%,#2347c4 0%,#0a1236 50%,#04060f 100%) fixed;min-height:100vh}
+main{max-width:860px;margin:0 auto;padding:20px 16px 40px}
+h1{margin:0 0 4px;text-align:center;text-transform:uppercase;letter-spacing:.3em;color:var(--p);text-shadow:0 0 18px rgba(240,192,64,.6);font-size:2rem}
+.sub{text-align:center;color:var(--muted);margin:0 0 14px}
+label{display:block;margin:12px 0 4px;font-weight:600}
+input,textarea,select{width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font:inherit}
+textarea{font-size:.9rem;line-height:1.4}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+button{font:inherit;padding:11px 22px;border-radius:999px;border:2px solid var(--text);background:var(--text);color:#0b1030;cursor:pointer;margin-top:14px}
+button.alt{background:transparent;color:var(--text)}
+#score{text-align:center;color:var(--p);font-weight:700;margin-bottom:10px}
+.bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-weight:700}
+.tm{font-size:2.4rem;color:var(--p)}.cashv{font-size:1.5rem;color:var(--ok)}
+.grid{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start}
+@media(max-width:640px){.grid{grid-template-columns:1fr}}
+.board{display:flex;flex-direction:column;gap:5px;min-width:230px}
+.step{display:flex;gap:6px;align-items:center;justify-content:space-between;min-height:42px;padding:4px 10px;border:1px solid #3b57c9;border-radius:8px;background:linear-gradient(90deg,#1a2f86,#0e1c5a);font-size:.8rem;color:#cdd8ff}
+.step.off{color:var(--p);font-weight:700}
+.step.pl{box-shadow:0 0 16px var(--p);border-color:var(--p)}.step.ch{box-shadow:0 0 16px var(--c);border-color:var(--c)}
+.step.home{background:linear-gradient(90deg,#1f7a4d,#0e4a2e);border-style:dashed}
+.chips{display:flex;gap:4px;flex-wrap:wrap}
+.chip{padding:3px 10px;border-radius:999px;font-weight:700;font-size:.85rem;animation:pop .45s}
+.chip.p{background:var(--p);color:#14110a}.chip.c{background:var(--c);color:#fff}
+@keyframes pop{0%{transform:scale(.3)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
+.q{background:linear-gradient(180deg,#14246b,#0b1642);border:2px solid var(--p);box-shadow:0 0 28px rgba(240,192,64,.25);border-radius:14px;padding:18px}
+.q h2{margin:0 0 14px;font-size:1.5rem;text-align:center}
+#opts{counter-reset:o}
+.opt{display:block;width:100%;text-align:left;margin:8px 0 0;padding:12px 14px;border:2px solid #3b57c9;border-radius:12px;background:linear-gradient(180deg,#1b3290,#0f1f63);color:var(--text);font-size:1.05rem}
+.opt::before{counter-increment:o;content:counter(o,upper-alpha) "  ";color:var(--p);font-weight:700}
+.opt:hover:not(:disabled){border-color:var(--p)}
+.opt.sel{border-color:var(--p)}.opt.ok{border-color:var(--ok)}.opt.no{border-color:var(--no)}
+#msg{min-height:1.5rem;margin:12px 0 0;font-weight:600}
+.side{display:flex;gap:8px;justify-content:center;margin-bottom:6px;flex-wrap:wrap}.side button{margin:0;padding:8px 14px}.side button.on{background:var(--p);color:#14110a;border-color:var(--p)}
+#cd{text-align:center;font-size:1.2rem;color:var(--p);min-height:1.6rem;font-weight:700}
+.end{font-size:1.5rem;font-weight:700;margin:6px 0}
+.card{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
+.card h3{margin:0 0 2px}.card small{color:var(--muted)}
+#fx{position:fixed;inset:0;pointer-events:none;opacity:0}
+#fx.win{animation:fw 1.4s}#fx.lose{animation:fl 1.2s}
+@keyframes fw{0%{opacity:1;background:radial-gradient(circle,#ffe58a,transparent 70%)}100%{opacity:0}}
+@keyframes fl{0%{opacity:1;background:radial-gradient(circle,#ff3b52,transparent 75%)}100%{opacity:0}}
+main.shake{animation:sh .6s}
+@keyframes sh{0%,100%{transform:translateX(0)}20%{transform:translateX(-12px)}40%{transform:translateX(10px)}60%{transform:translateX(-8px)}80%{transform:translateX(6px)}}
+#invbox{display:flex;gap:8px;margin:0 0 8px}#invbox input{flex:1}#invbox button{margin:0;padding:8px 16px}
+#inv{min-height:1.2rem}
+body.player #nxt,body.player #side,body.player #back,body.player .tk,body.player #oh,body.player #ol{display:none!important}
+</style>
+</head>
+<body>
+<div id="fx"></div>
+<main>
+<button class="alt" id="snd" style="float:right;margin:0">🔊 Sound on</button>
+<h1>The Chase</h1>
+<div id="invbox" hidden><input id="invurl" readonly><button id="cp">Copy invite link</button></div>
+<div id="inv" class="sub"></div>
+
+<section id="setup">
+<p class="sub">Two teams. Each plays a Money Builder, then the Chase.</p>
+<div class="row"><div><label for="t1">Team 1</label><input id="t1" value="Nayif &amp; Abu Tariq"></div><div><label for="t2">Team 2</label><input id="t2" value="Ain &amp; Sully"></div></div>
+<label for="cn">Chaser name</label><input id="cn" value="The Chaser">
+<label for="mode">Who plays the Chaser?</label>
+<select id="mode"><option value="person">A person (you pick their answer each round)</option><option value="cpu">The computer</option></select>
+<div id="accwrap" hidden><label for="acc">Computer accuracy: <span id="av">75%</span></label><input type="range" id="acc" min="30" max="95" value="75"></div>
+<div class="row"><div><label for="secs">Money Builder seconds</label><input id="secs" type="number" value="60"></div><div><label for="val">Cash per correct answer</label><input id="val" type="number" value="1000"></div></div>
+<label>Gap to the Chaser in mistakes: high offer / your cash / low offer</label>
+<div class="row3"><input id="g1" type="number" value="2"><input id="g2" type="number" value="3"><input id="g3" type="number" value="4"></div>
+<label for="mq">Money Builder questions – one per line: Question | Correct | Wrong | Wrong</label>
+<textarea id="mq" rows="7" placeholder="Type your own questions here. Example: Who won the match last night? | Ahmed | Khalid | Sara"></textarea>
+<label for="cq">Chase questions (leave empty to reuse the Money Builder ones)</label>
+<textarea id="cq" rows="7"></textarea>
+<button id="start">Start game</button>
+</section>
+
+<section id="join" hidden><label for="pn">Your name</label><input id="pn" maxlength="20"><label for="pr">I’m playing as</label><select id="pr"><option value="t1">Team 1</option><option value="t2">Team 2</option><option value="c">The Chaser</option><option value="s">Just watching</option></select><button id="go">Join game</button></section>
+<div id="stage"><div id="score" hidden></div>
+<section id="play" hidden>
+<div id="bar" class="bar"><div id="who"></div><div id="tm" class="tm">60</div><div id="cash" class="cashv">$0</div></div>
+<div class="grid">
+<div><div class="q"><h2 id="qt"></h2><div id="side" class="side" hidden><button class="alt" id="sT"></button><button class="alt" id="sC"></button></div><div id="cd"></div><div id="opts"></div><div id="msg"></div><button id="nxt" hidden>Next</button></div><button class="alt" id="back">Edit setup</button></div>
+<div class="board" id="board" hidden></div>
+</div>
+</section>
+
+<section id="offer" hidden>
+<p class="sub" id="otxt"></p>
+<div class="grid">
+<div>
+<div class="card"><h3>⬆ High offer</h3><small id="gh"></small><input id="oh" type="number" min="0"><button class="tk" data-k="0">Take the high offer</button></div>
+<div class="card"><h3>💰 Stick with your cash</h3><small id="gs"></small><button class="tk" data-k="1">Keep my cash</button></div>
+<div class="card"><h3>⬇ Low offer</h3><small id="gl"></small><input id="ol" type="number" min="0"><button class="tk" data-k="2">Take the low offer</button></div>
+</div>
+<div class="board" id="board2"></div>
+</div>
+</section>
+
+<section id="final" hidden><div class="end" id="ftxt"></div><button id="again">Play again</button></section>
+</div>
+</main>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+var ac=null,on=true;
+function tn(f,d,ty,v,at,to){if(!on||!ac)return;var o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime+(at||0);o.type=ty||'sine';o.frequency.setValueAtTime(f,t);if(to)o.frequency.exponentialRampToValueAtTime(to,t+d);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(v||0.2,t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+d);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+d+0.05)}
+function ns(d,v,at){if(!on||!ac)return;var n=Math.floor(ac.sampleRate*d),b=ac.createBuffer(1,n,ac.sampleRate),a=b.getChannelData(0),i;for(i=0;i<n;i++)a[i]=(Math.random()*2-1)*(1-i/n);var s=ac.createBufferSource(),g=ac.createGain();s.buffer=b;g.gain.value=v;s.connect(g);g.connect(ac.destination);s.start(ac.currentTime+(at||0))}
+var sfx={
+init:function(){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume()}catch(e){}},
+start:function(){tn(220,.6,'sawtooth',.12,0,660);tn(330,.6,'triangle',.12,.1,990)},
+lock:function(){tn(520,.09,'square',.08)},
+ok:function(){tn(880,.18,'sine',.25);tn(1318,.35,'sine',.25,.12)},
+no:function(){tn(160,.5,'sawtooth',.22,0,80)},
+chase:function(){tn(65,.7,'sawtooth',.3);tn(98,.6,'square',.12,.05);ns(.25,.15)},
+caught:function(){tn(196,.5,'sawtooth',.25);tn(147,.5,'sawtooth',.25,.35);tn(98,1,'sawtooth',.3,.7);ns(.6,.2,.7)},
+win:function(){[523,659,784,1047,1319].forEach(function(f,i){tn(f,.4,'triangle',.25,i*.13)});tn(1568,.9,'triangle',.25,.7)},
+play:function(r,c){if(r)sfx.ok();else sfx.no();if(c)setTimeout(sfx.chase,650)}
+};
+$('snd').onclick=function(){on=!on;this.textContent=on?'🔊 Sound on':'🔇 Sound off';if(on){sfx.init();sfx.lock()}};
+function fx(win){var f=$('fx');f.className='';void f.offsetWidth;f.className=win?'win':'lose';if(!win){var m=document.querySelector('main');m.classList.remove('shake');void m.offsetWidth;m.classList.add('shake')}}
+
+var IDS=['t1','t2','cn','mode','acc','secs','val','g1','g2','g3','mq','cq'];
+try{var s=JSON.parse(localStorage.getItem('chase4')||'null');if(s)IDS.forEach(function(k){if(s[k]!==undefined)$(k).value=s[k]})}catch(e){}
+$('av').textContent=$('acc').value+'%';
+$('acc').oninput=function(){$('av').textContent=this.value+'%'};
+function sm(){$('accwrap').hidden=$('mode').value!=='cpu'}$('mode').onchange=sm;sm();
+
+var T,ti,cfg,st={};
+function fm(n){return '$'+Math.round(n).toLocaleString('en-US')}
+function shuf(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+function parse(t){return t.split('\n').map(function(l){return l.split('|').map(function(x){return x.trim()}).filter(Boolean)}).filter(function(p){return p.length>=3})}
+function show(id){['setup','play','offer','final'].forEach(function(x){$(x).hidden=x!==id})}
+function sc(){$('score').hidden=false;$('score').textContent=T[0].n+': '+fm(T[0].bank)+'   |   '+T[1].n+': '+fm(T[1].bank)}
+function nq(p){if(p.i>=p.a.length){p.a=shuf(p.a);p.i=0}return p.a[p.i++]}
+function render(q,cb){var o=shuf(q.slice(1));$('qt').textContent=q[0];$('opts').innerHTML='';$('msg').textContent='';$('nxt').hidden=true;
+o.forEach(function(t){var b=document.createElement('button');b.className='opt';b.textContent=t;b.setAttribute('data-t',t);b.onclick=function(){sfx.lock();cb(b,t)};$('opts').appendChild(b)})}
+function chip(k,t){var e=document.createElement('span');e.className='chip '+k;e.textContent=t;return e}
+function board(el,lab){el.innerHTML='';var N=st.N,i,r,l,c;
+for(i=0;i<=N;i++){r=document.createElement('div');r.className='step'+(i===N?' home':'')+(st.p===i?' pl':'')+(st.c===i?' ch':'')+(lab[i]?' off':'');
+l=document.createElement('span');l.textContent=i===N?'HOME':(lab[i]||'');r.appendChild(l);
+c=document.createElement('div');c.className='chips';
+if(st.p===i)c.appendChild(chip('p',T[ti].n));if(st.c===i)c.appendChild(chip('c',cfg.cn));
+r.appendChild(c);el.appendChild(r)}}
+
+function begin(){
+var mq=parse($('mq').value),cq=parse($('cq').value);
+if(!mq.length&&!cq.length){alert('Add at least one question: Question | Correct | Wrong | Wrong');return}
+if(!mq.length)mq=cq;if(!cq.length)cq=mq;
+var o={};IDS.forEach(function(k){o[k]=$(k).value});try{localStorage.setItem('chase4',JSON.stringify(o))}catch(e){}
+cfg={cn:$('cn').value||'The Chaser',mode:$('mode').value,acc:+$('acc').value,secs:+$('secs').value||60,val:+$('val').value||1000,g:[+$('g1').value||2,+$('g2').value||3,+$('g3').value||4],mq:mq,cq:cq};
+cfg.N=Math.max(7,cfg.g[2]+3);
+T=[{n:$('t1').value||'Team 1',cash:0,bank:0},{n:$('t2').value||'Team 2',cash:0,bank:0}];ti=0;
+sfx.init();sfx.start();sc();r1();
+}
+
+/* Round 1: Money Builder */
+function r1(){
+clearInterval(st.iv);
+st={ph:'r1',left:cfg.secs,cash:0,pool:{a:shuf(cfg.mq.slice()),i:0}};
+show('play');$('bar').hidden=false;$('board').hidden=true;$('side').hidden=true;$('cd').textContent='';
+$('who').textContent=T[ti].n+' – Money Builder';$('cash').textContent=fm(0);$('tm').textContent=st.left;
+q1();
+st.iv=setInterval(function(){st.left--;$('tm').textContent=st.left;
+if(st.left<=5&&st.left>0)tn(900,.08,'square',.1);
+if(st.left<=0){clearInterval(st.iv);endR1()}},1000);
+}
+function q1(){var q=nq(st.pool);st.lock=0;
+render(q,function(b,t){if(st.ph!=='r1'||st.lock)return;st.lock=1;var ok=t===q[1];
+document.querySelectorAll('.opt').forEach(function(x){x.disabled=true;if(x.getAttribute('data-t')===q[1])x.classList.add('ok')});
+if(ok){st.cash+=cfg.val;sfx.ok()}else{b.classList.add('no');sfx.no()}
+$('cash').textContent=fm(st.cash);
+setTimeout(function(){if(st.ph==='r1')q1()},700)})}
+function endR1(){st.ph='x';T[ti].cash=st.cash;sfx.win();
+$('qt').textContent='⏱ Time! '+T[ti].n+' built '+fm(st.cash)+'.';$('opts').innerHTML='';$('msg').textContent='';
+$('nxt').textContent='See the Chaser’s offers';$('nxt').onclick=offer;$('nxt').hidden=false}
+
+/* Offers */
+function offer(){
+var c=T[ti].cash;st.p=-1;st.c=0;st.N=cfg.N;
+$('oh').value=Math.max(c*3,cfg.val*3);$('ol').value=Math.floor(c/4);
+$('otxt').textContent=T[ti].n+' banked '+fm(c)+'. '+cfg.cn+' makes an offer…';
+$('gh').textContent='Gap to the Chaser: '+cfg.g[0]+' mistakes';$('gs').textContent='Gap to the Chaser: '+cfg.g[1]+' mistakes – '+fm(c);$('gl').textContent='Gap to the Chaser: '+cfg.g[2]+' mistakes';
+show('offer');drawOff();sfx.chase();
+}
+function drawOff(){var l={};l[cfg.g[0]]='HIGH '+fm(+$('oh').value||0);l[cfg.g[1]]='YOUR CASH '+fm(T[ti].cash);l[cfg.g[2]]='LOW '+fm(+$('ol').value||0);board($('board2'),l)}
+$('oh').oninput=drawOff;$('ol').oninput=drawOff;
+document.querySelectorAll('.tk').forEach(function(b){b.onclick=function(){take(+b.getAttribute('data-k'))}});
+
+/* Round 2: the Chase */
+function take(k){
+st.start=cfg.g[k];st.prize=k===0?(+$('oh').value||0):k===1?T[ti].cash:(+$('ol').value||0);
+st.p=st.start;st.c=0;st.ph='ch';st.pool={a:shuf(cfg.cq.slice()),i:0};
+show('play');$('bar').hidden=true;$('board').hidden=false;$('nxt').onclick=nextq;sfx.start();drawCh();nextq();
+}
+function drawCh(){var l={};l[st.start]='💰 '+fm(st.prize);board($('board'),l)}
+function nextq(){var q=nq(st.pool);st.pt=undefined;st.ct=undefined;st.q=q;st.fin=0;st.side='t';clearInterval(st.cd);clearTimeout(st.cpu);$('cd').textContent='';
+render(q,function(b,t){chpick(b,t)});sides();
+if(cfg.mode==='cpu')st.cpu=setTimeout(cpuLock,2000+Math.random()*4000)}
+function sides(){var p=cfg.mode==='person';$('side').hidden=!p;$('sT').textContent=T[ti].n+' answers';$('sC').textContent=cfg.cn+' answers';$('sT').className='alt'+(st.side==='t'?' on':'');$('sC').className='alt'+(st.side==='c'?' on':'')}
+$('sT').onclick=function(){st.side='t';sides()};$('sC').onclick=function(){st.side='c';sides()};
+function cpuLock(){var q=st.q,a=q[1],w=q.slice(1).filter(function(x){return x!==a});lock('c',Math.random()<cfg.acc/100?a:w[Math.floor(Math.random()*w.length)],null)}
+function chpick(b,t){lock(cfg.mode==='cpu'?'t':st.side,t,b)}
+function lock(s,t,b){
+if(st.fin||(s==='t'?st.pt:st.ct)!==undefined)return;
+if(s==='t')st.pt=t;else st.ct=t;
+if(b)b.classList.add('sel');
+if(st.pt!==undefined&&st.ct!==undefined)return done();
+if(cfg.mode==='person'){st.side=s==='t'?'c':'t';sides()}
+if(cfg.mode==='cpu'&&s==='t'){clearTimeout(st.cpu);st.cpu=setTimeout(cpuLock,800+Math.random()*1500)}
+st.left2=5;cdTxt();clearInterval(st.cd);
+st.cd=setInterval(function(){st.left2--;if(st.left2<=0)done();else cdTxt()},1000);
+}
+function cdTxt(){$('cd').textContent='⏱ '+st.left2+'s for '+(st.pt===undefined?T[ti].n:cfg.cn)+' to lock in';if(st.left2<=3)tn(900,.08,'square',.1)}
+function done(){if(st.fin)return;st.fin=1;clearInterval(st.cd);clearTimeout(st.cpu);$('cd').textContent='';resolve(st.pt,st.ct,st.q[1])}
+function resolve(pt,ct,ans){
+var right=pt===ans,cr=ct===ans,m=[];
+document.querySelectorAll('.opt').forEach(function(b){var t=b.getAttribute('data-t'),g=[];b.disabled=true;
+if(t===pt)g.push(T[ti].n);if(t===ct)g.push(cfg.cn);
+if(g.length)b.textContent=t+'  ← '+g.join(' + ');
+if(t===ans)b.classList.add('ok');else if(g.length)b.classList.add('no')});
+m.push(T[ti].n+(pt===undefined?' ran out of time.':right?' is right.':' is wrong.'));m.push(cfg.cn+(ct===undefined?' ran out of time.':cr?' is right.':' is wrong.'));
+sfx.play(right,cr);
+if(right)st.p++;
+if(st.p>=st.N)return endCh(true,m);
+if(cr)st.c++;
+drawCh();
+if(st.c>=st.p)return endCh(false,m);
+$('msg').textContent=m.join(' ');$('nxt').textContent='Next question';$('nxt').hidden=false;
+}
+function endCh(win,m){
+drawCh();setTimeout(win?sfx.win:sfx.caught,900);fx(win);
+T[ti].bank=win?st.prize:0;sc();
+$('msg').innerHTML='';var d=document.createElement('div');d.className='end';
+d.textContent=win?'🏠 '+T[ti].n+' make it home and bank '+fm(st.prize)+'!':'💥 '+cfg.cn+' caught '+T[ti].n+'. They bank $0.';
+$('msg').appendChild(d);$('msg').appendChild(document.createTextNode(m.join(' ')));
+$('nxt').textContent=ti===0?'Next team':'See the final result';
+$('nxt').onclick=function(){if(ti===0){ti=1;r1()}else fin()};$('nxt').hidden=false;
+}
+function fin(){
+var a=T[0],b=T[1];show('final');
+$('ftxt').textContent=(a.bank===b.bank?'🤝 It’s a tie!':'🏆 '+(a.bank>b.bank?a.n:b.n)+' win!')+'  ·  '+a.n+': '+fm(a.bank)+'  ·  '+b.n+': '+fm(b.bank);
+sfx.win();fx(true);
+}
+var net=null,room=new URLSearchParams(location.search).get('room');
+var RL={t1:'Team 1',t2:'Team 2',c:'Chaser',s:'Watching'};
+function roster(l){var s=l.map(function(p){return p.n+' ('+RL[p.r]+')'}).join(' · ');$('inv').textContent='Players: '+(s||'none yet')}
+function remote(m){
+var btn=null;document.querySelectorAll('.opt').forEach(function(b){if(b.getAttribute('data-t')===m.pick)btn=b});
+if(!btn||btn.disabled)return;
+var tr=ti===0?'t1':'t2';
+if(st.ph==='r1'){if(m.r===tr)btn.click();return}
+if(st.ph==='ch'){if(m.r===tr)lock('t',m.pick,btn);else if(m.r==='c'&&cfg.mode==='person')lock('c',m.pick,btn)}
+}
+function wsu(q){return (location.protocol==='https:'?'wss://':'ws://')+location.host+'/?'+q}
+function hostNet(){
+var w;try{w=new WebSocket(wsu('host=1'))}catch(e){return}
+w.onmessage=function(e){var m;try{m=JSON.parse(e.data)}catch(x){return}
+if(m.t==='hello'){
+net={send:function(o){if(w.readyState===1)w.send(JSON.stringify(o))},cue:function(n){this.send({t:'cue',n:n})}};
+$('invurl').value=location.origin+location.pathname+'?room='+m.code;$('invbox').hidden=false;$('inv').textContent='Players: none yet';
+$('cp').onclick=function(){$('invurl').select();try{navigator.clipboard.writeText($('invurl').value)}catch(x){document.execCommand('copy')}this.textContent='Copied!'};
+Object.keys(sfx).forEach(function(k){if(k==='init'||k==='play')return;var f=sfx[k];sfx[k]=function(){net.cue(k);f.apply(sfx,arguments)}});
+var f0=fx;fx=function(v){net.send({t:'fx',w:v});f0(v)};
+var tm;new MutationObserver(function(){clearTimeout(tm);tm=setTimeout(function(){net.send({t:'state',h:$('stage').innerHTML})},120)}).observe($('stage'),{childList:true,subtree:true,attributes:true,characterData:true});
+setInterval(function(){net.send({t:'ping'})},25000)}
+else if(m.t==='act')remote(m);else if(m.t==='roster')roster(m.l)};
+w.onclose=function(){if(net)$('inv').textContent='Room closed – reload this page to open a new room.'}}
+function playerInit(){
+document.body.classList.add('player');$('setup').hidden=true;$('join').hidden=false;
+$('go').onclick=function(){
+sfx.init();var w=new WebSocket(wsu('room='+encodeURIComponent(room)));
+net={send:function(o){if(w.readyState===1)w.send(JSON.stringify(o))}};
+w.onopen=function(){net.send({t:'join',n:$('pn').value||'Player',r:$('pr').value});$('join').hidden=true;setInterval(function(){net.send({t:'ping'})},25000)};
+w.onmessage=function(e){var m;try{m=JSON.parse(e.data)}catch(x){return}
+if(m.t==='state')$('stage').innerHTML=m.h;
+else if(m.t==='cue'){if(sfx[m.n]&&m.n!=='init'&&m.n!=='play')sfx[m.n]()}
+else if(m.t==='fx')fx(m.w);
+else if(m.t==='roster')roster(m.l);
+else if(m.t==='wait')$('inv').textContent='Connected. Waiting for the host to start…';
+else if(m.t==='err'){$('inv').textContent=m.m;$('stage').innerHTML=''}};
+w.onclose=function(){$('inv').textContent='Disconnected – reload to rejoin.'}};
+$('stage').onclick=function(e){var b=e.target.closest('.opt');if(b&&!b.disabled&&net){sfx.lock();net.send({t:'act',pick:b.getAttribute('data-t')})}}
+}
+if(room)playerInit();else if(location.protocol.indexOf('http')===0)hostNet();
+$('start').onclick=begin;
+$('back').onclick=function(){clearInterval(st.iv);clearInterval(st.cd);clearTimeout(st.cpu);st.fin=1;st.ph='x';$('score').hidden=true;show('setup')};
+$('again').onclick=function(){$('score').hidden=true;show('setup')};
+})();
+</script>
+</body>
+</html>
